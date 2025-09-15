@@ -6,54 +6,45 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="24dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Text shown in the middle of the page -->
+    <TextView
+        android:id="@+id/pageText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="end">
+        android:text="Page 1"
+        android:textSize="32sp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:gravity="center"/>
 
-        <ImageButton
-            android:id="@+id/btnPower"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:background="@null"
-            android:src="@android:drawable/ic_lock_power_off"
-            android:contentDescription="Power Button"/>
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
-
+    <!-- Navigation Buttons below the text -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_marginTop="48dp">
 
-        <ImageButton
+        <Button
             android:id="@+id/btnPrev"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:src="@android:drawable/ic_media_previous"
-            android:background="@null"
-            android:contentDescription="Previous"/>
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Prev" />
 
-        <Space
-            android:layout_width="32dp"
-            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/btnPower"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Exit"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
 
-        <ImageButton
+        <Button
             android:id="@+id/btnNext"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:src="@android:drawable/ic_media_next"
-            android:background="@null"
-            android:contentDescription="Next"/>
-    </LinearLayout>
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Next" />
 
+    </LinearLayout>
 </LinearLayout>
