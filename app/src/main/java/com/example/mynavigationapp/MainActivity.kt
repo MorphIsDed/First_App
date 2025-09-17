@@ -3,8 +3,7 @@ package com.example.mynavigationapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -16,13 +15,14 @@ import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 class MainActivity : ComponentActivity() {
 
@@ -69,19 +69,35 @@ class MainActivity : ComponentActivity() {
 
             val displayedText = if (progressFraction < 0.5f) texts[lowerIndex] else texts[upperIndex]
 
-            Box(
+            val infiniteTransition = rememberInfiniteTransition()
+            val buttonScale by infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.2f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = EaseInOutCubic),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
+
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(gradientBrush)
                     .padding(16.dp)
             ) {
-                // Power button at top-right
+                // Proper use of maxWidth and maxHeight inside BoxWithConstraintsScope
                 IconButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        finish()  // Exits the app
+                        finish()
                     },
-                    modifier = Modifier.align(Alignment.TopEnd)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(
+                            end = (this.maxWidth.value * 0.05f).dp,
+                            top = (this.maxHeight.value * 0.05f).dp
+                        )
+                        .scale(buttonScale)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.PowerSettingsNew,
@@ -90,7 +106,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Center text
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -105,7 +120,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Navigation buttons
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
