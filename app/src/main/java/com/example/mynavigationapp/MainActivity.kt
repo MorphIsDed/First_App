@@ -1,5 +1,6 @@
 package com.example.mynavigationapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,128 +32,134 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val haptic = LocalHapticFeedback.current
-            var currentPage by remember { mutableStateOf(0) }
+            MainScreen()
+        }
+    }
+}
 
-            val texts = listOf(
-                "Page 1",
-                "Page 2",
-                "Page 3"
-            )
+@Composable
+fun MainScreen() {
+    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    var currentPage by remember { mutableStateOf(0) }
 
-            val startColors = listOf(
-                Color(0xFF2193b0),
-                Color(0xFFee9ca7),
-                Color(0xFFcc2b5e)
-            )
+    val texts = listOf(
+        "Welcome to Page 1",
+        "Here is Page 2",
+        "This is Page 3"
+    )
 
-            val endColors = listOf(
-                Color(0xFF6dd5ed),
-                Color(0xFFffdde1),
-                Color(0xFF753a88)
-            )
+    val startColors = listOf(
+        Color(0xFF2193b0),
+        Color(0xFFee9ca7),
+        Color(0xFFcc2b5e)
+    )
 
-            val animatedProgress by animateFloatAsState(
-                targetValue = currentPage.toFloat(),
-                animationSpec = tween(durationMillis = 700)
-            )
+    val endColors = listOf(
+        Color(0xFF6dd5ed),
+        Color(0xFFffdde1),
+        Color(0xFF753a88)
+    )
 
-            val lowerIndex = animatedProgress.toInt().coerceIn(0, texts.lastIndex)
-            val upperIndex = (lowerIndex + 1).coerceAtMost(texts.lastIndex)
-            val progressFraction = animatedProgress - lowerIndex
+    val animatedProgress by animateFloatAsState(
+        targetValue = currentPage.toFloat(),
+        animationSpec = tween(durationMillis = 700)
+    )
 
-            val gradientBrush = Brush.verticalGradient(
-                colors = listOf(
-                    lerp(startColors[lowerIndex], startColors[upperIndex], progressFraction),
-                    lerp(endColors[lowerIndex], endColors[upperIndex], progressFraction)
+    val lowerIndex = animatedProgress.toInt().coerceIn(0, texts.lastIndex)
+    val upperIndex = (lowerIndex + 1).coerceAtMost(texts.lastIndex)
+    val progressFraction = animatedProgress - lowerIndex
+
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            lerp(startColors[lowerIndex], startColors[upperIndex], progressFraction),
+            lerp(endColors[lowerIndex], endColors[upperIndex], progressFraction)
+        )
+    )
+
+    val displayedText = if (progressFraction < 0.5f) texts[lowerIndex] else texts[upperIndex]
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val buttonScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = EaseInOutCubic),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+            .padding(16.dp)
+    ) {
+        val screenWidth = this.maxWidth
+        val screenHeight = this.maxHeight
+
+        // Power Button with Haptics and Exit Flow
+        IconButton(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                context.startActivity(Intent(context, ClosingActivity::class.java))
+            },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(
+                    end = (screenWidth.value * 0.05f).dp,
+                    top = (screenHeight.value * 0.05f).dp
                 )
+                .scale(buttonScale)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.PowerSettingsNew,
+                contentDescription = "Exit App",
+                tint = Color.White
             )
+        }
 
-            val displayedText = if (progressFraction < 0.5f) texts[lowerIndex] else texts[upperIndex]
-
-            val infiniteTransition = rememberInfiniteTransition()
-            val buttonScale by infiniteTransition.animateFloat(
-                initialValue = 1f,
-                targetValue = 1.2f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1000, easing = EaseInOutCubic),
-                    repeatMode = RepeatMode.Reverse
-                )
+        // Center Display Text
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = displayedText,
+                fontSize = 28.sp,
+                color = Color.White
             )
+        }
 
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(gradientBrush)
-                    .padding(16.dp)
+        // Navigation Buttons with Haptics
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    if (currentPage > 0) currentPage--
+                },
+                enabled = currentPage > 0
             ) {
-                val screenWidth = this.maxWidth
-                val screenHeight = this.maxHeight
+                Text("Previous")
+            }
 
-                // Power Button with Haptics
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        finish()
-                    },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(
-                            end = (screenWidth.value * 0.05f).dp,
-                            top = (screenHeight.value * 0.05f).dp
-                        )
-                        .scale(buttonScale)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.PowerSettingsNew,
-                        contentDescription = "Exit App",
-                        tint = Color.White
-                    )
-                }
-
-                // Center Text
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = displayedText,
-                        fontSize = 28.sp,
-                        color = Color.White
-                    )
-                }
-
-                // Navigation Buttons with Haptics
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 24.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            if (currentPage > 0) currentPage--
-                        },
-                        enabled = currentPage > 0
-                    ) {
-                        Text("Previous")
-                    }
-
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            if (currentPage < texts.lastIndex) currentPage++
-                        },
-                        enabled = currentPage < texts.lastIndex
-                    ) {
-                        Text("Next")
-                    }
-                }
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    if (currentPage < texts.lastIndex) currentPage++
+                },
+                enabled = currentPage < texts.lastIndex
+            ) {
+                Text("Next")
             }
         }
     }
