@@ -85,7 +85,10 @@ class MainActivity : ComponentActivity() {
                     .background(gradientBrush)
                     .padding(16.dp)
             ) {
-                // Proper use of maxWidth and maxHeight inside BoxWithConstraintsScope
+                val screenWidth = this.maxWidth
+                val screenHeight = this.maxHeight
+
+                // Power Button with Haptics
                 IconButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -94,8 +97,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(
-                            end = (this.maxWidth.value * 0.05f).dp,
-                            top = (this.maxHeight.value * 0.05f).dp
+                            end = (screenWidth.value * 0.05f).dp,
+                            top = (screenHeight.value * 0.05f).dp
                         )
                         .scale(buttonScale)
                 ) {
@@ -106,6 +109,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Center Text
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -120,6 +124,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Navigation Buttons with Haptics
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -129,10 +134,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Button(
                         onClick = {
-                            if (currentPage > 0) {
-                                currentPage--
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            }
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            if (currentPage > 0) currentPage--
                         },
                         enabled = currentPage > 0
                     ) {
@@ -141,10 +144,8 @@ class MainActivity : ComponentActivity() {
 
                     Button(
                         onClick = {
-                            if (currentPage < texts.lastIndex) {
-                                currentPage++
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            }
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            if (currentPage < texts.lastIndex) currentPage++
                         },
                         enabled = currentPage < texts.lastIndex
                     ) {
